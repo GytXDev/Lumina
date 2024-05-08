@@ -127,6 +127,7 @@ class ChatHomePage extends ConsumerWidget {
                           active: true,
                           phoneNumber: '0',
                           userType: '',
+                          isConcessionary: '',
                         ),
                       );
                     },

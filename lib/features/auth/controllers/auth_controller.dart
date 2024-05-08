@@ -39,6 +39,7 @@ class AuthController {
   void saveUserInfoToFirestore({
     required String username,
     required var profileImage,
+    required bool isConcessionary,
     required BuildContext context,
     required bool mounted,
   }) {
@@ -46,6 +47,7 @@ class AuthController {
       username: username,
       profileImage: profileImage,
       ref: ref,
+      isConcessionary: isConcessionary,
       context: context,
       mounted: mounted,
     );

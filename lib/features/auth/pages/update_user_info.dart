@@ -1,3 +1,5 @@
+// ignore_for_file: void_checks
+
 import 'dart:io';
 
 import 'package:lumina/colors/coloors.dart';
@@ -30,11 +32,13 @@ class _UpdateUserInfoState extends ConsumerState<UpdateUserInfo> {
   File? imageCamera;
   List<File> _images = [];
   bool showSelectedImage = false;
+  bool isConcessionary = false;
 
   late TextEditingController usernameController;
 
-  saveUserDataToFirebase() {
+  void saveUserDataToFirebase() {
     String username = usernameController.text;
+
     if (username.isEmpty) {
       return showAlertDialog(
         context: context,
@@ -48,11 +52,13 @@ class _UpdateUserInfoState extends ConsumerState<UpdateUserInfo> {
       );
     }
 
+    // Sauvegarder les données de l'utilisateur dans Firebase
     ref.read(authControllerProvider).saveUserInfoToFirestore(
           username: username,
           profileImage: (imageCamera != null || _images.isNotEmpty)
               ? (_images.isNotEmpty ? _images.first : imageCamera!)
               : (widget.profileImageUrl ?? ''),
+          isConcessionary: isConcessionary,
           context: context,
           mounted: mounted,
         );
@@ -279,6 +285,105 @@ class _UpdateUserInfoState extends ConsumerState<UpdateUserInfo> {
                   width: 20,
                 ),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Text(
+                    'Êtes-vous un concessionnaire ?',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isConcessionary = false;
+                          });
+                        },
+                        child: Container(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: !isConcessionary
+                                ? Coolors.blueDark
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.person,
+                                color: !isConcessionary
+                                    ? Colors.white
+                                    : Coolors.greyDark,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Particulier',
+                                style: TextStyle(
+                                  color: !isConcessionary
+                                      ? Colors.white
+                                      : Coolors.greyDark,
+                                  fontWeight: !isConcessionary
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isConcessionary = true;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: isConcessionary
+                                ? Coolors.blueDark
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.store,
+                                color: isConcessionary
+                                    ? Colors.white
+                                    : Coolors.greyDark,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Concessionnaire',
+                                style: TextStyle(
+                                  color: isConcessionary
+                                      ? Colors.white
+                                      : Coolors.greyDark,
+                                  fontWeight: isConcessionary
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

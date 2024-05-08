@@ -133,6 +133,7 @@ class AuthRepository {
   void saveUserInfoToFirestore({
     required String username,
     required var profileImage,
+    required bool isConcessionary,
     required ProviderRef ref,
     required BuildContext context,
     required bool mounted,
@@ -170,6 +171,7 @@ class AuthRepository {
       }
 
       bool isAdmin = await isFirstUser();
+      bool isCertified = false;
       UserModel? existingUser =
           await getUserByPhoneNumber(auth.currentUser!.phoneNumber!);
 
@@ -183,6 +185,8 @@ class AuthRepository {
           lastSeen: DateTime.now().millisecondsSinceEpoch,
           phoneNumber: auth.currentUser!.phoneNumber!,
           userType: isAdmin ? 'admin' : 'user',
+          isConcessionary: isConcessionary ? 'concessionary' : 'particular',
+          isCertified: isCertified,
           latitude: latitude,
           longitude: longitude,
         );
@@ -212,11 +216,17 @@ class AuthRepository {
           }
         }
       } else {
+        // Utilisateur existant, vérifier si le champ isCertified existe déjà
+        if (existingUser.isCertified != null) {
+          isCertified = existingUser.isCertified!;
+        }
         // Utilisateur existant, mettre à jour les informations
         await firestore.collection('users').doc(uid).update({
           'username': username,
           'profileImageUrl': profileImageUrl,
+          'isConcessionary': isConcessionary ? 'concessionary' : 'particular',
           'latitude': latitude,
+          'isCertified': isCertified,
           'longitude': longitude,
         });
       }

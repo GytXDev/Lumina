@@ -8,6 +8,8 @@ class UserModel {
   final String userType;
   final double latitude;
   final double longitude;
+  final String isConcessionary;
+   final bool? isCertified;
 
   UserModel({
     required this.lastSeen,
@@ -17,6 +19,8 @@ class UserModel {
     required this.active,
     required this.phoneNumber,
     required this.userType,
+    required this.isConcessionary,
+    this.isCertified,
     this.latitude = 0,
     this.longitude = 0,
   });
@@ -30,6 +34,8 @@ class UserModel {
       'lastSeen': lastSeen,
       'phoneNumber': phoneNumber,
       'userType': userType,
+      'isConcessionary': isConcessionary,
+      'isCertified': isCertified,
       'latitude': latitude,
       'longitude': longitude,
     };
@@ -44,6 +50,8 @@ class UserModel {
       lastSeen: map['lastSeen'] ?? 0,
       phoneNumber: map['phoneNumber'] ?? '',
       userType: map['userType'] ?? 'user',
+      isConcessionary: map['isConcessionary'] ?? 'particular',
+      isCertified: map['isCertified'] ?? false,
       latitude: map['latitude'] ?? 0.0,
       longitude: map['longitude'] ?? 0.0,
     );
