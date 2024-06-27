@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "473264691621",
+    "firebase_url": "https://lumina-26e6b-default-rtdb.firebaseio.com",
+    "project_id": "lumina-26e6b",
+    "storage_bucket": "lumina-26e6b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473264691621:android:969baebf9a6e8d3f0eb04c",
+        "android_client_info": {
+          "package_name": "com.gytx.lumina"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgeo9i1bnfC1d1iB2r3R_YKHEWHL_-KZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
