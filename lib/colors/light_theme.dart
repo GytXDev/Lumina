@@ -8,7 +8,6 @@ ThemeData lightTheme() {
   final ThemeData base = ThemeData.light();
   return base.copyWith(
     // ignore: deprecated_member_use
-    backgroundColor: Coolors.backgroundLight,
     scaffoldBackgroundColor: Coolors.backgroundLight,
     extensions: [
       CustomThemeExtension.lightMode,
@@ -72,8 +71,19 @@ ThemeData lightTheme() {
       tileColor: Coolors.backgroundLight,
     ),
     switchTheme: const SwitchThemeData(
-      thumbColor: MaterialStatePropertyAll(Color(0xFF83939C)),
-      trackColor: MaterialStatePropertyAll(Color(0xFF344047)),
-    ),
+      thumbColor: WidgetStatePropertyAll(Color(0xFF83939C)),
+      trackColor: WidgetStatePropertyAll(Color(0xFF344047)),
+    ), colorScheme: ColorScheme(
+  surface: Coolors.backgroundLight,
+  onSurface: Colors.black, // Exemple d'une couleur par défaut
+  brightness: Brightness.light, // Brightness est obligatoire (light ou dark)
+  primary: Colors.blue, // Exemple d'une couleur
+  onPrimary: Colors.white, // Contraste avec la couleur primaire
+  secondary: Colors.green, // Exemple d'une couleur secondaire
+  onSecondary: Colors.white, // Contraste avec la couleur secondaire
+  error: Colors.red, // Couleur pour les erreurs
+  onError: Colors.white, // Contraste pour l'arrière-plan
+),
+
   );
 }

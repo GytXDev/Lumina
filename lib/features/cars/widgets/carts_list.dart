@@ -178,7 +178,7 @@ class _CartsListState extends State<CartsList> {
     return Scaffold(
       appBar: AppBar(
         // ignore: deprecated_member_use
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         title: Text(
           AppLocalizations.of(context).translate('requestsList'),
           style: TextStyle(color: context.theme.blackText),

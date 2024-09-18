@@ -4,12 +4,9 @@ import 'package:flutter/services.dart';
 import 'coloors.dart';
 import 'extension/extension_theme.dart';
 
-
 ThemeData darkTheme() {
   final ThemeData base = ThemeData.dark();
   return base.copyWith(
-    // ignore: deprecated_member_use
-    backgroundColor: Coolors.backgroundDark,
     scaffoldBackgroundColor: Coolors.backgroundDark,
     extensions: [
       CustomThemeExtension.darkMode,
@@ -72,8 +69,19 @@ ThemeData darkTheme() {
       tileColor: Coolors.backgroundDark,
     ),
     switchTheme: const SwitchThemeData(
-      thumbColor: MaterialStatePropertyAll(Coolors.greyDark),
-      trackColor: MaterialStatePropertyAll(Color(0xFF344047)),
+      thumbColor: WidgetStatePropertyAll(Coolors.greyDark),
+      trackColor: WidgetStatePropertyAll(Color(0xFF344047)),
+    ),
+    colorScheme: const ColorScheme(
+      brightness: Brightness.dark, // Assure que le mode sombre est actif
+      primary: Coolors.blueDark, // Couleur primaire
+      onPrimary: Colors.white, // Couleur contrastée avec le primaire
+      secondary: Coolors.greenDark, // Couleur secondaire
+      onSecondary: Colors.white, // Texte sur l'arrière-plan
+      surface: Coolors.greyBackground, // Surface (Cartes, Dialogues)
+      onSurface: Coolors.greyDark, // Texte sur la surface
+      error: Colors.red, // Couleur d'erreur
+      onError: Colors.white, // Couleur contrastée pour l'erreur
     ),
   );
 }

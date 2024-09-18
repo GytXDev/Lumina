@@ -131,7 +131,7 @@ class _CarsPageState extends State<CarsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: Row(
           children: [
             const Text(

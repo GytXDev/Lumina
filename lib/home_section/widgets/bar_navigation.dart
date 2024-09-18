@@ -141,7 +141,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
       duration: const Duration(milliseconds: 300),
       height: isFloatingBarOpen ? 200.0 : 0.0,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.background,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20.0),
           topRight: Radius.circular(20.0),

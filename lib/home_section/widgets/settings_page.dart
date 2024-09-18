@@ -352,7 +352,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         // ignore: deprecated_member_use
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);

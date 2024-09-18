@@ -63,7 +63,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       countryListTheme: CountryListThemeData(
         bottomSheetHeight: 600,
         // ignore: deprecated_member_use
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         flagSize: 22,
         borderRadius: BorderRadius.circular(20),
         textStyle: TextStyle(

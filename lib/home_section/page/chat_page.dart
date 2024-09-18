@@ -59,7 +59,7 @@ class ChatHomePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         // ignore: deprecated_member_use
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         title: Text(
           AppLocalizations.of(context).translate('messages'),
           style: const TextStyle(

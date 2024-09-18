@@ -108,7 +108,7 @@ class _VerificationPageState extends ConsumerState<VerificationPage> {
     return Scaffold(
       appBar: AppBar(
         // ignore: deprecated_member_use
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         elevation: 0,
         title: Text(
           AppLocalizations.of(context).translate('verifyNumberTitle'),

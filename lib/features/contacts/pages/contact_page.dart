@@ -49,7 +49,7 @@ class ContactPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         // ignore: deprecated_member_use
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
