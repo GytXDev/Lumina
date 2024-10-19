@@ -13,7 +13,36 @@
           "package_name": "com.gytx.lumina"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "473264691621-6ko4dhb6udj3iqj49gkf220p62m657ho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gytx.lumina",
+            "certificate_hash": "908b7d6d8895edf7660af6a65bc59c5f2c0c8119"
+          }
+        },
+        {
+          "client_id": "473264691621-jr1l5fj6nbdt2286qliv39osk8452rgf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gytx.lumina",
+            "certificate_hash": "faa4b5528ba578af764958f513f447203e6e8d64"
+          }
+        },
+        {
+          "client_id": "473264691621-vt1oi5ev9beuhjlpnak4q5ad6v6n4ojs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gytx.lumina",
+            "certificate_hash": "456d57a1d89a3cadbaadfbe2bc187c2c61a93e66"
+          }
+        },
+        {
+          "client_id": "473264691621-91mckcsc9e78sd40g75htf7qv8uvjok2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAgeo9i1bnfC1d1iB2r3R_YKHEWHL_-KZc"
@@ -21,7 +50,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473264691621-91mckcsc9e78sd40g75htf7qv8uvjok2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "473264691621-m6c6restfeobmoct0at7nj1k8abrs753.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gytx.lumina"
+              }
+            }
+          ]
         }
       }
     }

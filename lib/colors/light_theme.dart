@@ -73,7 +73,7 @@ ThemeData lightTheme() {
     switchTheme: const SwitchThemeData(
       thumbColor: WidgetStatePropertyAll(Color(0xFF83939C)),
       trackColor: WidgetStatePropertyAll(Color(0xFF344047)),
-    ), colorScheme: ColorScheme(
+    ), colorScheme: const ColorScheme(
   surface: Coolors.backgroundLight,
   onSurface: Colors.black, // Exemple d'une couleur par défaut
   brightness: Brightness.light, // Brightness est obligatoire (light ou dark)

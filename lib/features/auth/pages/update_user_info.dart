@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:lumina/languages/app_translations.dart';
 
-
 class UpdateUserInfo extends ConsumerStatefulWidget {
   const UpdateUserInfo({super.key, this.profileImageUrl, this.username});
 
@@ -40,10 +39,7 @@ class _UpdateUserInfoState extends ConsumerState<UpdateUserInfo> {
         message: AppLocalizations.of(context).translate('usernameLengthError'),
       );
     }
-
-   
   }
-
 
   @override
   void initState() {
@@ -64,7 +60,6 @@ class _UpdateUserInfoState extends ConsumerState<UpdateUserInfo> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            
             const SizedBox(
               height: 40,
             ),
@@ -91,7 +86,6 @@ class _UpdateUserInfoState extends ConsumerState<UpdateUserInfo> {
                 ),
               ],
             ),
-            
           ],
         ),
       ),

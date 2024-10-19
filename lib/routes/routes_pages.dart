@@ -9,9 +9,6 @@ import 'package:page_transition/page_transition.dart';
 
 import '../features/auth/pages/login_page.dart';
 import '../features/auth/pages/user_info_page.dart';
-import '../features/auth/pages/verification_page.dart';
-//import '../features/chat/pages/chat_page.dart';
-//import '../features/contacts/pages/contact_page.dart';
 import '../home_section/page/profil_page.dart';
 
 class Routes {
@@ -34,15 +31,6 @@ class Routes {
       case login:
         return MaterialPageRoute(
           builder: (context) => const LoginPage(),
-        );
-
-      case verification:
-        final Map args = settings.arguments as Map;
-        return MaterialPageRoute(
-          builder: (context) => VerificationPage(
-            smsCodeId: args['smsCodeId'],
-            phoneNumber: args['phoneNumber'],
-          ),
         );
       case userInfo:
         final String? profileImageUrl = settings.arguments as String?;
