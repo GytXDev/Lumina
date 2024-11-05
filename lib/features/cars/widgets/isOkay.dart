@@ -72,6 +72,7 @@ class _IsOkayPageState extends State<IsOkayPage> {
                 );
 
                 chatRepository.sendTextMessage(
+                  // ignore: use_build_context_synchronously
                   context: context,
                   textMessage: approvalMessage,
                   receiverId: car.userId,
@@ -128,6 +129,7 @@ class _IsOkayPageState extends State<IsOkayPage> {
                 );
 
                 chatRepository.sendTextMessage(
+                  // ignore: use_build_context_synchronously
                   context: context,
                   textMessage: premiumPackageMessage,
                   receiverId: car.userId,
@@ -185,6 +187,7 @@ class _IsOkayPageState extends State<IsOkayPage> {
                 );
 
                 chatRepository.sendTextMessage(
+                  // ignore: use_build_context_synchronously
                   context: context,
                   textMessage: rejectionMessage,
                   receiverId: car.userId,

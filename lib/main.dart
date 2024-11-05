@@ -138,6 +138,7 @@ class MyApp extends ConsumerWidget {
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate, 
       ],
       supportedLocales: const [
         Locale('en', 'US'),

@@ -166,8 +166,10 @@ class _ChatTextFieldState extends ConsumerState<ChatTextField> {
 
                     print('${images.length} images have been selected.');
 
+                    // ignore: use_build_context_synchronously
                     Navigator.pop(context); // Ferme le bottom sheet
                     showImagePreviewDialog(
+                        // ignore: use_build_context_synchronously
                         context, images); // Affiche l'aperçu des images
                   }).catchError((e) {
                     print('Error selecting images: $e');

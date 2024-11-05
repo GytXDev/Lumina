@@ -135,26 +135,6 @@ class _CarPostState extends State<CarPost> {
     }
   }
 
-  // récuperer l'un des admins
-  Future<UserModel?> getOneAdmin() async {
-    try {
-      QuerySnapshot adminSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('userType', isEqualTo: 'admin')
-          .limit(1)
-          .get();
-      if (adminSnapshot.docs.isNotEmpty) {
-        return UserModel.fromMap(
-            adminSnapshot.docs.first.data() as Map<String, dynamic>);
-      } else {
-        return null;
-      }
-    } catch (e) {
-      print('Erreur lors de la récupération de l\'admin : $e');
-      return null;
-    }
-  }
-
   // Instance de CarsRepository
   String formatLikes(int number) {
     if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)}M';
@@ -218,7 +198,7 @@ class _CarPostState extends State<CarPost> {
           // Afficher un message si aucune donnée n'est disponible
           return Center(
             child: Text(
-              AppLocalizations.of(context).translate('noResultsFoundText'),
+              AppLocalizations.of(context).translate('noCarsAvailable'),
             ),
           );
         } else {
@@ -302,21 +282,28 @@ class _CarPostState extends State<CarPost> {
                       children: [
                         Row(
                           children: [
-                            const SizedBox(width: 8.0),
-                            Row(
-                              children: [
-                                const SizedBox(
-                                    width:
-                                        4.0), // Espacement entre le nom et l'image de certification
-                                if (car
-                                    .isCertified) // Condition pour afficher l'image de certification
-                                  Image.asset(
-                                    'assets/icons/certified.png',
-                                    width: 18.0, // Taille de l'image
-                                    height: 18.0, // Taille de l'image
-                                  ),
-                              ],
+                            CircleAvatar(
+                              radius: 20.0,
+                              backgroundColor: Colors.blueGrey,
+                              backgroundImage: car.userImage.isNotEmpty
+                                  ? NetworkImage(car.userImage)
+                                  : null,
+                              child: car.userImage.isEmpty
+                                  ? const Icon(
+                                      Icons.person,
+                                      color: Colors.white,
+                                    )
+                                  : null,
                             ),
+                            const SizedBox(width: 8.0),
+                            Text(car.username),
+                            if (car
+                                .isCertified) // Condition pour afficher l'image de certification
+                              Image.asset(
+                                'assets/icons/certified.png',
+                                width: 18.0, // Taille de l'image
+                                height: 18.0, // Taille de l'image
+                              ),
                           ],
                         ),
                         Text(
@@ -602,56 +589,50 @@ class _CarPostState extends State<CarPost> {
                                           orderDescription: car.description,
                                           orderCurrency: car.currency,
                                         );
-                                        // Récupérer un admin
-                                        UserModel? adminUser =
-                                            await getOneAdmin();
 
-                                        if (adminUser != null) {
-                                          final ChatRepository chatRepository =
-                                              ChatRepository(
-                                            firestore:
-                                                FirebaseFirestore.instance,
-                                            auth: FirebaseAuth.instance,
-                                          );
-                                          //Envoie du message
-                                          Future.microtask(() {
-                                            String message;
+                                        final ChatRepository chatRepository =
+                                            ChatRepository(
+                                          firestore: FirebaseFirestore.instance,
+                                          auth: FirebaseAuth.instance,
+                                        );
+                                        //Envoie du message
+                                        Future.microtask(() {
+                                          String message;
 
-                                            if (car.yearOrNew == CarType.news) {
-                                              message =
-                                                  AppLocalizations.of(context)
-                                                      .translateWithVariables(
-                                                'interestMessageNewCar',
-                                                {
-                                                  "carName": car.carName,
-                                                  "brand": car.brand,
-                                                  "price": car.price.toString(),
-                                                  "currency": car.currency,
-                                                },
-                                              );
-                                            } else {
-                                              message =
-                                                  AppLocalizations.of(context)
-                                                      .translateWithVariables(
-                                                'interestMessageUsedCar',
-                                                {
-                                                  "carName": car.carName,
-                                                  "brand": car.brand,
-                                                  "price": car.price.toString(),
-                                                  "currency": car.currency,
-                                                },
-                                              );
-                                            }
-                                            chatRepository.sendTextMessage(
-                                              context: context,
-                                              textMessage: message,
-                                              receiverId: adminUser
-                                                  .uid, // ID du vendeur
-                                              senderData:
-                                                  user, // Données de l'utilisateur qui passe la commande
+                                          if (car.yearOrNew == CarType.news) {
+                                            message =
+                                                AppLocalizations.of(context)
+                                                    .translateWithVariables(
+                                              'interestMessageNewCar',
+                                              {
+                                                "carName": car.carName,
+                                                "brand": car.brand,
+                                                "price": car.price.toString(),
+                                                "currency": car.currency,
+                                              },
                                             );
-                                          });
-                                        }
+                                          } else {
+                                            message =
+                                                AppLocalizations.of(context)
+                                                    .translateWithVariables(
+                                              'interestMessageUsedCar',
+                                              {
+                                                "carName": car.carName,
+                                                "brand": car.brand,
+                                                "price": car.price.toString(),
+                                                "currency": car.currency,
+                                              },
+                                            );
+                                          }
+                                          chatRepository.sendTextMessage(
+                                            context: context,
+                                            textMessage: message,
+                                            receiverId:
+                                                car.userId, // ID du vendeur
+                                            senderData:
+                                                user, // Données de l'utilisateur qui passe la commande
+                                          );
+                                        });
 
                                         // Si la commande n'existe pas, tu peux l'ajouter à la collection "orders"
                                         await _carsRepository

@@ -5,6 +5,7 @@ import 'package:location/location.dart';
 import 'package:lumina/colors/helpers/show_loading_dialog.dart';
 import 'package:lumina/features/chat/repository/chat_repository.dart';
 import 'package:lumina/languages/app_translations.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lumina/models/user_models.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -75,35 +76,42 @@ class AuthRepository {
   }
 
   void updateUserPresence() {
-    Map<String, dynamic> online = {
-      'active': true,
-      'lastSeen': DateTime.now().millisecondsSinceEpoch,
-    };
-    Map<String, dynamic> offline = {
-      'active': false,
-      'lastSeen': DateTime.now().millisecondsSinceEpoch,
-    };
-
     final connectedRef = realtime.ref('.info/connected');
 
+    // Écouter l'état de connexion en temps réel
     connectedRef.onValue.listen((event) async {
       final isConnected = event.snapshot.value as bool? ?? false;
-      if (isConnected) {
-        await realtime.ref().child(auth.currentUser!.uid).update(online);
-        await firestore
-            .collection('users')
-            .doc(auth.currentUser!.uid)
-            .update(online);
-      } else {
-        await realtime
-            .ref()
-            .child(auth.currentUser!.uid)
-            .onDisconnect()
-            .update(offline);
-        await firestore
-            .collection('users')
-            .doc(auth.currentUser!.uid)
-            .update(offline);
+      final userId = auth.currentUser?.uid;
+
+      if (userId == null) {
+        print('Utilisateur non authentifié.');
+        return;
+      }
+
+      // Détails de la présence
+      final Map<String, dynamic> online = {
+        'active': true,
+        'lastSeen': DateTime.now().millisecondsSinceEpoch,
+      };
+      final Map<String, dynamic> offline = {
+        'active': false,
+        'lastSeen': DateTime.now().millisecondsSinceEpoch,
+      };
+
+      try {
+        if (isConnected) {
+          // Mise à jour en ligne dès la connexion
+          await realtime.ref(userId).update(online);
+          await firestore.collection('users').doc(userId).update(online);
+
+          // Planifier la déconnexion automatique avec `onDisconnect`
+          await realtime.ref(userId).onDisconnect().update(offline);
+        } else {
+          // Mise à jour hors ligne en cas de déconnexion manuelle
+          await firestore.collection('users').doc(userId).update(offline);
+        }
+      } catch (e) {
+        print('Erreur lors de la mise à jour de la présence: $e');
       }
     });
   }
@@ -121,15 +129,37 @@ class AuthRepository {
   }
 
   Future<UserModel?> getCurrentUserInfo() async {
-    UserModel? user;
-    final userInfo =
-        await firestore.collection('users').doc(auth.currentUser?.uid).get();
-    if (userInfo.data() == null) return user;
-    user = UserModel.fromMap(userInfo.data()!);
-    return user;
+    try {
+      final userInfo =
+          await firestore.collection('users').doc(auth.currentUser?.uid).get();
+
+      if (userInfo.exists && userInfo.data() != null) {
+        return UserModel.fromMap(userInfo.data()!);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user info: $e");
+      return null;
+    }
   }
 
-  // method for saving user information
+  Future<UserModel?> getUserByEmailAddress(String emailAddress) async {
+    // Query the Firestore to get user by email address
+    QuerySnapshot querySnapshot = await firestore
+        .collection('users')
+        .where('email', isEqualTo: emailAddress)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      return UserModel.fromMap(
+          querySnapshot.docs.first.data() as Map<String, dynamic>);
+    } else {
+      return null;
+    }
+  }
+
+  // Method for saving user information
   void saveUserInfoToFirestore({
     required String username,
     required var profileImage,
@@ -139,6 +169,7 @@ class AuthRepository {
     required bool mounted,
   }) async {
     try {
+      // Demander la permission de localisation
       PermissionStatus permissionStatus = await Location().requestPermission();
       if (permissionStatus != PermissionStatus.granted) {
         QuickAlert.show(
@@ -151,6 +182,7 @@ class AuthRepository {
         return;
       }
 
+      // Afficher un dialogue de chargement
       showLoadingDialog(
         context: context,
         message: AppLocalizations.of(context).translate('savingUserInfo'),
@@ -158,80 +190,53 @@ class AuthRepository {
       );
 
       String uid = auth.currentUser!.uid;
+      String email = auth.currentUser!.email!;
       String profileImageUrl = profileImage is String ? profileImage : '';
       LocationData locationData = await getCoordinates();
-      double latitude = locationData.latitude!;
-      double longitude = locationData.longitude!;
+      double latitude = locationData.latitude ?? 0.0;
+      double longitude = locationData.longitude ?? 0.0;
 
       final firebaseStorageRepository =
           ref.read(firebaseStorageRepositoryProvider);
+
+      // Upload de l'image si nécessaire
       if (profileImage != null && profileImage is! String) {
         profileImageUrl = await firebaseStorageRepository.storeFileToFirebase(
             'profileImage/$uid', profileImage);
       }
 
       bool isAdmin = await isFirstUser();
-      bool isCertified = false;
-      UserModel? existingUser =
-          await getUserByPhoneNumber(auth.currentUser!.phoneNumber!);
+
+      // Vérifier si l'utilisateur existe déjà avec le même email
+      UserModel? existingUser = await getUserByEmailAddress(email);
 
       if (existingUser == null) {
-        // Aucun utilisateur existant, créer un nouvel utilisateur
-        UserModel newUser = UserModel(
-          username: username,
-          uid: uid,
-          profileImageUrl: profileImageUrl,
-          active: true,
-          lastSeen: DateTime.now().millisecondsSinceEpoch,
-          phoneNumber: auth.currentUser!.phoneNumber!,
-          userType: isAdmin ? 'admin' : 'user',
-          isConcessionary: isConcessionary ? 'concessionary' : 'particular',
-          isCertified: isCertified,
-          latitude: latitude,
-          longitude: longitude,
+        // L'utilisateur n'existe pas, on le crée
+        await _createUser(
+          uid,
+          username,
+          profileImageUrl,
+          isConcessionary,
+          isAdmin,
+          latitude,
+          longitude,
+          context,
+          ref,
         );
-
-        await firestore.collection('users').doc(uid).set(newUser.toMap());
-        print('New user info saved to Firestore with UID: $uid');
-
-        if (!isAdmin) {
-          UserModel? adminUser = await findAnAdmin();
-          if (adminUser != null) {
-            final ChatRepository chatRepository =
-                ref.read(chatRepositoryProvider);
-            String welcomeMessage =
-                AppLocalizations.of(context).translate('welcomeAdminMessage');
-
-            // Appelez la nouvelle méthode sendWelcomeMessage
-            chatRepository.sendWelcomeMessage(
-              context: context,
-              message: welcomeMessage,
-              receiverId: newUser.uid,
-              adminData:
-                  adminUser, // Assurez-vous que ceci est l'objet UserModel de l'administrateur
-            );
-            print('Welcome message sent to new user UID: $uid');
-          } else {
-            print("Admin user not found, welcome message not sent.");
-          }
-        }
       } else {
-        // Utilisateur existant, vérifier si le champ isCertified existe déjà
-        if (existingUser.isCertified != null) {
-          isCertified = existingUser.isCertified!;
-        }
-        // Utilisateur existant, mettre à jour les informations
-        await firestore.collection('users').doc(uid).update({
-          'username': username,
-          'profileImageUrl': profileImageUrl,
-          'isConcessionary': isConcessionary ? 'concessionary' : 'particular',
-          'latitude': latitude,
-          'isCertified': isCertified,
-          'longitude': longitude,
-        });
+        // L'utilisateur existe, on met à jour ses informations
+        await _updateUser(
+          existingUser,
+          username,
+          profileImageUrl,
+          isConcessionary,
+          latitude,
+          longitude,
+        );
       }
 
-      Navigator.pop(context); // Ferme le dialogue de chargement
+      Navigator.pop(context); // Fermer le dialogue de chargement
+
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, Routes.home, (route) => false);
     } catch (e) {
@@ -240,112 +245,104 @@ class AuthRepository {
     }
   }
 
-// Ajoutez cette fonction pour obtenir les coordonnées de latitude et de longitude
+  // Create a new user
+  Future<void> _createUser(
+      String uid,
+      String username,
+      String profileImageUrl,
+      bool isConcessionary,
+      bool isAdmin,
+      double latitude,
+      double longitude,
+      BuildContext context,
+      ProviderRef ref) async {
+    UserModel newUser = UserModel(
+      username: username,
+      uid: uid,
+      profileImageUrl: profileImageUrl,
+      active: true,
+      lastSeen: DateTime.now().millisecondsSinceEpoch,
+      email: auth.currentUser!.email!,
+      phoneNumber: '',
+      userType: isAdmin ? 'admin' : 'user',
+      isConcessionary: isConcessionary ? 'concessionary' : 'particular',
+      isCertified: false,
+      latitude: latitude,
+      longitude: longitude,
+    );
+
+    await firestore.collection('users').doc(uid).set(newUser.toMap());
+    print('New user info saved to Firestore with UID: $uid');
+
+    if (!isAdmin) {
+      UserModel? adminUser = await findAnAdmin();
+      if (adminUser != null) {
+        final ChatRepository chatRepository = ref.read(chatRepositoryProvider);
+        String welcomeMessage =
+            AppLocalizations.of(context).translate('welcomeAdminMessage');
+
+        // Send welcome message
+        chatRepository.sendWelcomeMessage(
+          context: context,
+          message: welcomeMessage,
+          receiverId: newUser.uid,
+          adminData: adminUser,
+        );
+        print('Welcome message sent to new user UID: $uid');
+      } else {
+        print("Admin user not found, welcome message not sent.");
+      }
+    }
+  }
+
+  // Update existing user information
+  Future<void> _updateUser(
+      UserModel existingUser,
+      String username,
+      String profileImageUrl,
+      bool isConcessionary,
+      double latitude,
+      double longitude) async {
+    await firestore.collection('users').doc(existingUser.uid).update({
+      'username': username,
+      'profileImageUrl': profileImageUrl,
+      'isConcessionary': isConcessionary ? 'concessionary' : 'particular',
+      'latitude': latitude,
+      'isCertified': existingUser.isCertified ?? false,
+      'longitude': longitude,
+    });
+  }
+
+  // Ajoutez cette fonction pour obtenir les coordonnées de latitude et de longitude
   Future<LocationData> getCoordinates() async {
     Location location = Location();
     return await location.getLocation();
-  }
-
-  Future<UserModel?> getUserByPhoneNumber(String phoneNumber) async {
-    // Query the Firestore to get user by phoneNumber
-    QuerySnapshot querySnapshot = await firestore
-        .collection('users')
-        .where('phoneNumber', isEqualTo: phoneNumber)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      return UserModel.fromMap(
-          querySnapshot.docs.first.data() as Map<String, dynamic>);
-    } else {
-      return null;
-    }
   }
 
   User? getCurrentUser() {
     return auth.currentUser;
   }
 
-  //method for verify Code Sms
-  void verifySmsCode({
-    required BuildContext context,
-    required String smsCodeId,
-    required String smsCode,
-    required bool mounted,
-  }) async {
+  // méthode de connexion via google
+  Future<UserCredential?> signInWithGoogle() async {
     try {
-      showLoadingDialog(
-        context: context,
-        message: AppLocalizations.of(context).translate('verifyingCode'),
-        barrierDismissible: false,
-      );
-      final credential = PhoneAuthProvider.credential(
-        verificationId: smsCodeId,
-        smsCode: smsCode,
-      );
-      await auth.signInWithCredential(credential);
-      UserModel? user = await getCurrentUserInfo();
-      if (!mounted) return;
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        Routes.userInfo,
-        (route) => false,
-        arguments: user?.profileImageUrl,
-      );
-    } on FirebaseAuthException catch (e) {
-      Navigator.of(context).pop();
-      showAlertDialog(
-        context: context,
-        message: AppLocalizations.of(context).translate('invalidCode'),
-      );
-      print(e);
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser != null) {
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        final OAuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        return await auth.signInWithCredential(credential);
+      }
+    } catch (e) {
+      print("Erreur lors de la connexion avec Google: $e");
     }
+    return null;
   }
-
-  // method for smsCode
-
-  Future<void> sendSmsCode({
-    required BuildContext context,
-    required String phoneNumber,
-  }) async {
-    try {
-      showLoadingDialog(
-        context: context,
-        message: AppLocalizations.of(context).translateWithVariables(
-            'sendingVerificationCode', {"phoneNumber": phoneNumber}),
-        barrierDismissible: false,
-      );
-
-      await auth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        verificationCompleted: (phoneAuthCredential) async {
-          await auth.signInWithCredential(phoneAuthCredential);
-        },
-        verificationFailed: (e) {
-          // Ferme le dialogue de chargement avec un délai pour attendre la fermeture effective
-          Future.delayed(Duration.zero, () {
-            Navigator.of(context).pop();
-            showAlertDialog(context: context, message: e.toString());
-          });
-        },
-        codeSent: (verificationId, forceResendingToken) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            Routes.verification,
-            (route) => false,
-            arguments: {
-              'phoneNumber': phoneNumber,
-              'smsCodeId': verificationId,
-            },
-          );
-        },
-        codeAutoRetrievalTimeout: (verificationId) {},
-      );
-    } on FirebaseAuthException catch (e) {
-      // Ferme le dialogue de chargement avec un délai pour attendre la fermeture effective
-      Future.delayed(Duration.zero, () {
-        Navigator.of(context).pop();
-        showAlertDialog(context: context, message: e.toString());
-      });
-    }
-  }
-  //methde pour appel
 }

@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../models/user_models.dart';
+import '../../../routes/routes_pages.dart';
 import '../repository/auth_repository.dart';
 
 final authControllerProvider = Provider(
@@ -53,27 +55,20 @@ class AuthController {
     );
   }
 
-  void verifySmsCode({
-    required BuildContext context,
-    required String smsCodeId,
-    required String smsCode,
-    required bool mounted,
-  }) {
-    authRepository.verifySmsCode(
-      context: context,
-      smsCodeId: smsCodeId,
-      smsCode: smsCode,
-      mounted: mounted,
-    );
-  }
-
-  void sendSmsCode({
-    required BuildContext context,
-    required String phoneNumber,
-  }) {
-    authRepository.sendSmsCode(
-      context: context,
-      phoneNumber: phoneNumber,
-    );
+  Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      final UserCredential? userCredential =
+          await authRepository.signInWithGoogle();
+      if (userCredential != null) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          Routes.userInfo,
+          (route) => false,
+        );
+      } else {
+        print('erreur');
+      }
+    } catch (e) {
+      print("Error signing in with Google: $e");
+    }
   }
 }

@@ -121,6 +121,7 @@ class ChatHomePage extends ConsumerWidget {
                         Routes.chat,
                         arguments: UserModel(
                           lastSeen: 0,
+                          email: '',
                           username: lastMessageData.username,
                           uid: lastMessageData.contactId,
                           profileImageUrl: lastMessageData.profileImageUrl,

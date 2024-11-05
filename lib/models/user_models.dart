@@ -1,6 +1,7 @@
 class UserModel {
   final String username;
   final String uid;
+  final String email;
   final String profileImageUrl;
   final bool active;
   final int lastSeen;
@@ -19,6 +20,7 @@ class UserModel {
     required this.uid,
     required this.profileImageUrl,
     required this.active,
+    required this.email,
     required this.phoneNumber,
     required this.userType,
     required this.isConcessionary,
@@ -36,6 +38,7 @@ class UserModel {
       'profileImageUrl': profileImageUrl,
       'active': active,
       'lastSeen': lastSeen,
+      'email': email,
       'phoneNumber': phoneNumber,
       'userType': userType,
       'isConcessionary': isConcessionary,
@@ -54,6 +57,7 @@ class UserModel {
       profileImageUrl: map['profileImageUrl'] ?? '',
       active: map['active'] ?? false,
       lastSeen: map['lastSeen'] ?? 0,
+      email: map['email'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
       userType: map['userType'] ?? 'user',
       isConcessionary: map['isConcessionary'] ?? 'particular',
@@ -73,6 +77,7 @@ class UserModel {
     String? profileImageUrl,
     bool? active,
     int? lastSeen,
+    String? email,
     String? phoneNumber,
     String? userType,
     String? isConcessionary,
@@ -88,6 +93,7 @@ class UserModel {
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       active: active ?? this.active,
       lastSeen: lastSeen ?? this.lastSeen,
+      email: email ?? this.email,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       userType: userType ?? this.userType,
       isConcessionary: isConcessionary ?? this.isConcessionary,
